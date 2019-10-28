@@ -73,12 +73,60 @@ ssdpClient.search('urn:schemas-upnp-org:device:MediaRenderer:1');
 
 fastify.get('/speaker/:name/protocols', async (request, reply) => {
 	const name = request.params.name
-	return me.speakers[name].getSupportedProtocols()
+	return await me.speakers[name].getSupportedProtocols()
+})
+
+fastify.get('/speaker/:name/transportInfo', async (request, reply) => {
+	const name = request.params.name
+	return await me.speakers[name].getTransportInfo()
+})
+
+fastify.get('/speaker/:name/wha', async (request, reply) => {
+	const name = request.params.name
+	return await me.speakers[name].getWholeHomeAudioStatus()
+})
+
+fastify.get('/speaker/:name/wha/create', async (request, reply) => {
+	const name = request.params.name
+	return await me.speakers[name].wholeHomeAudioCreateParty()
+})
+
+fastify.get('/speaker/:name/wha/join', {
+	schema: {
+		querystring: {
+			party: {
+				type: 'string'
+			}
+		}
+	}
+}, async (request, reply) => {
+	const name = request.params.name
+	return await me.speakers[name].wholeHomeAudioJoinParty(request.query.party)
+})
+
+fastify.get('/speaker/:name/wha/leave', async (request, reply) => {
+	const name = request.params.name
+	return await me.speakers[name].wholeHomeAudioLeaveParty()
+})
+
+fastify.get('/speaker/:name', async (request, reply) => {
+	const name = request.params.name
+	return await me.speakers[name].getStatus()
 })
 
 fastify.get('/speaker/:name/stop', async (request, reply) => {
 	const name = request.params.name
-	return me.speakers[name].stop()
+	return await me.speakers[name].stop()
+})
+
+fastify.get('/speaker/:name/play', async (request, reply) => {
+	const name = request.params.name
+	return await me.speakers[name].play()
+})
+
+fastify.get('/speaker/:name/pause', async (request, reply) => {
+	const name = request.params.name
+	return await me.speakers[name].pause()
 })
 
 fastify.get('/speaker/:name/load', {
@@ -93,20 +141,38 @@ fastify.get('/speaker/:name/load', {
 		}
 	}
 }, async (request, reply) => {
-	const url = Object.keys(me.streams).includes(request.query.name) ? me.streams[request.query.name].url : request.query.url
+	const stream = Object.keys(me.streams).includes(request.query.name) ? me.streams[request.query.name].url : undefined
+	const url = stream || request.query.url
 	const name = request.params.name
 	const options = {
 		autoplay: true,
 		contentType: 'audio',
 		metadata: {
-			title: 'Ole Tester',
+			title: request.query.name,
 			creator: 'Ole Kristensen',
 			type: 'audio', // can be 'video', 'audio' or 'image'
 		}
 	}
-	return me.speakers[name].load(url, options)
+	return await me.speakers[name].load(url, options)
 })
 
+fastify.get('/speaker/:name/volume', {
+	schema: {
+		querystring: {
+			v: {
+				type: 'integer'
+			}
+		}
+	}
+}, async (request, reply) => {
+	const name = request.params.name
+	const v = request.query.v
+	if(v){
+		return await me.speakers[name].setVolume(v)
+	} else {
+		return await me.speakers[name].getVolume()
+	}
+})
 
 const start = async () => {
 	try {
