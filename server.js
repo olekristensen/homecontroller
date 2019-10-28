@@ -109,6 +109,10 @@ fastify.get('/speaker/:name/wha/leave', async (request, reply) => {
 	return await me.speakers[name].wholeHomeAudioLeaveParty()
 })
 
+fastify.get('/speaker', async (request, reply) => {
+	return Object.keys(me.speakers)
+})
+
 fastify.get('/speaker/:name', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].getStatus()
