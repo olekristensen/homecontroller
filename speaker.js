@@ -76,7 +76,7 @@ class Speaker {
 			parseString(xml, callback)
 		})
 		const CurrentURIMetaData = await asyncParse(mediaInfo.CurrentURIMetaData)
-		mediaInfo.CurrentURIMetaData = CurrentURIMetaData["DIDL-Lite"].item;
+		if(CurrentURIMetaData) mediaInfo.CurrentURIMetaData = CurrentURIMetaData["DIDL-Lite"].item;
 		return mediaInfo;
 	}
 
