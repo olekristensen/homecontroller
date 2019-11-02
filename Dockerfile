@@ -20,7 +20,7 @@ RUN yarn install
 # Bundle app source
 COPY . .
 
-EXPOSE 9000
+EXPOSE 3000
 
 # Make the application run when running the container
 CMD [ "yarn", "start" ]
