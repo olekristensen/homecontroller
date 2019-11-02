@@ -269,7 +269,7 @@ fastify.get('/api/actions/stop', async (request, reply) => {
 })
 
 
-fastify.get("/", (req, reply) => {
+fastify.get("/api", (req, reply) => {
 	reply.view("/index.marko");
 });
 
