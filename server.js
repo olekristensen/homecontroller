@@ -203,13 +203,11 @@ fastify.get('/api/speaker/:name/wha/leave', async (request, reply) => {
 })
 
 fastify.get('/api/actions/next', async (request, reply) => {
-	// TODO:
-	// return await me.speakers[name].wholeHomeAudioLeaveParty()
+	return await changeStream(1)
 })
 
 fastify.get('/api/actions/previous', async (request, reply) => {
-	// TODO:
-	// return await me.speakers[name].wholeHomeAudioLeaveParty()
+	return await changeStream(-1)
 })
 
 fastify.get('/api/actions/up', async (request, reply) => {
@@ -229,6 +227,11 @@ fastify.get('/api/actions/play', async (request, reply) => {
 	let streamNameToPlay = getCurrentlyPlayingStreamName(allSpeakersStatus);
 	let mainSpeakerName = getMainSpeakerName();
 	let activeSpeakerNames = getActiveSpeakerNames();
+
+	let passiveSpeakerNames = getPassiveSpeakerNames()
+	await Promise.all(passiveSpeakerNames.map(async s => {
+		await me.speakers[s].wholeHomeAudioLeaveParty()
+	}))
 
 	//TODO: make function to extract wha master with priority given to main speaker
 	//TODO: make function to extract a currently playing defined stream playing from wha master or main speaker 
@@ -298,6 +301,29 @@ function getMainSpeakerName() {
 	})[0];
 }
 
+async function changeStream(offset) {
+	let allSpeakersStatus = await getAllSpeakersStatus()
+	let speakerName = getWhaMasterOrMainSpeakerName(allSpeakersStatus)
+	let speaker = me.speakers[speakerName]
+	let currentlyPlayingStreamName = getStreamNameFromUrl(speaker.status.media.CurrentURI)
+	let streamNames = Object.keys(me.settings.streams)
+	let nextIndex = mod((streamNames.indexOf(currentlyPlayingStreamName) + offset) ,streamNames.length)
+	let nextStreamName = streamNames[nextIndex]
+	const options = {
+		autoplay: true,
+		contentType: 'audio',
+		metadata: {
+			title: nextStreamName,
+			creator: 'Ole Kristensen',
+			type: 'audio', // can be 'video', 'audio' or 'image'
+		}
+	}
+	await me.speakers[speakerName].load(me.settings.streams[nextStreamName].url, options)
+	return {
+		streamNameToPlay: nextStreamName
+	}
+}
+
 function getWhaMasterOrMainSpeakerName(allSpeakersStatus) {
 	let mainSpeakerName = getMainSpeakerName()
 	let whaMasterSpeakers = allSpeakersStatus.filter(s => s.status.wha.DeviceStatus == '4')
@@ -315,7 +341,7 @@ function getStreamNameFromUrl(url) {
 	if (Object.keys(me.settings.streams).map(k => {
 			return me.settings.streams[k].url;
 		}).includes(url)) {
-			return Object.keys(me.settings.streams).filter(k => {
+		return Object.keys(me.settings.streams).filter(k => {
 			return me.settings.streams[k].url === url;
 		})[0];
 	}
@@ -353,6 +379,16 @@ function getActiveSpeakerNames() {
 		return speakerActive;
 	});
 	return activeSpeakerNames;
+}
+
+function getPassiveSpeakerNames() {
+	let activeSpeakerNames = getActiveSpeakerNames()
+	let passiveSpeakerNames = Object.keys(me.speakers).filter(k => !activeSpeakerNames.includes(k))
+	return passiveSpeakerNames
+}
+
+function mod(n, m) {
+	return ((n % m) + m) % m;
 }
 
 const start = async () => {
