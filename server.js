@@ -95,31 +95,31 @@ ssdpClient.search('urn:schemas-upnp-org:device:MediaRenderer:1');
 
 //ssdpClient.search('ssdp:all');
 
-fastify.get('/speaker', async (request, reply) => {
+fastify.get('/api/speaker', async (request, reply) => {
 	return Object.keys(me.speakers)
 })
 
-fastify.get('/speaker/:name', async (request, reply) => {
+fastify.get('/api/speaker/:name', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].getStatus()
 })
 
-fastify.get('/speaker/:name/stop', async (request, reply) => {
+fastify.get('/api/speaker/:name/stop', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].stop()
 })
 
-fastify.get('/speaker/:name/play', async (request, reply) => {
+fastify.get('/api/speaker/:name/play', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].play()
 })
 
-fastify.get('/speaker/:name/pause', async (request, reply) => {
+fastify.get('/api/speaker/:name/pause', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].pause()
 })
 
-fastify.get('/speaker/:name/load', {
+fastify.get('/api/speaker/:name/load', {
 	schema: {
 		querystring: {
 			url: {
@@ -146,7 +146,7 @@ fastify.get('/speaker/:name/load', {
 	return await me.speakers[name].load(url, options)
 })
 
-fastify.get('/speaker/:name/volume', {
+fastify.get('/api/speaker/:name/volume', {
 	schema: {
 		querystring: {
 			v: {
@@ -164,27 +164,27 @@ fastify.get('/speaker/:name/volume', {
 	}
 })
 
-fastify.get('/speaker/:name/protocols', async (request, reply) => {
+fastify.get('/api/speaker/:name/protocols', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].getSupportedProtocols()
 })
 
-fastify.get('/speaker/:name/transportInfo', async (request, reply) => {
+fastify.get('/api/speaker/:name/transportInfo', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].getTransportInfo()
 })
 
-fastify.get('/speaker/:name/wha', async (request, reply) => {
+fastify.get('/api/speaker/:name/wha', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].getWholeHomeAudioStatus()
 })
 
-fastify.get('/speaker/:name/wha/create', async (request, reply) => {
+fastify.get('/api/speaker/:name/wha/create', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].wholeHomeAudioCreateParty()
 })
 
-fastify.get('/speaker/:name/wha/join', {
+fastify.get('/api/speaker/:name/wha/join', {
 	schema: {
 		querystring: {
 			party: {
@@ -197,22 +197,32 @@ fastify.get('/speaker/:name/wha/join', {
 	return await me.speakers[name].wholeHomeAudioJoinParty(request.query.party)
 })
 
-fastify.get('/speaker/:name/wha/leave', async (request, reply) => {
+fastify.get('/api/speaker/:name/wha/leave', async (request, reply) => {
 	const name = request.params.name
 	return await me.speakers[name].wholeHomeAudioLeaveParty()
 })
 
-fastify.get('/actions/next', async (request, reply) => {
-	const name = request.params.name
-	return await me.speakers[name].wholeHomeAudioLeaveParty()
+fastify.get('/api/actions/next', async (request, reply) => {
+	// TODO:
+	// return await me.speakers[name].wholeHomeAudioLeaveParty()
 })
 
-fastify.get('/actions/previous', async (request, reply) => {
-	const name = request.params.name
-	return await me.speakers[name].wholeHomeAudioLeaveParty()
+fastify.get('/api/actions/previous', async (request, reply) => {
+	// TODO:
+	// return await me.speakers[name].wholeHomeAudioLeaveParty()
 })
 
-fastify.get('/actions/play', async (request, reply) => {
+fastify.get('/api/actions/up', async (request, reply) => {
+	// TODO:
+	// return await me.speakers[name].wholeHomeAudioLeaveParty()
+})
+
+fastify.get('/api/actions/down', async (request, reply) => {
+	// TODO:
+	// return await me.speakers[name].wholeHomeAudioLeaveParty()
+})
+
+fastify.get('/api/actions/play', async (request, reply) => {
 
 	let allSpeakersStatus = await getAllSpeakersStatus();
 
@@ -250,6 +260,14 @@ fastify.get('/actions/play', async (request, reply) => {
 	}
 
 })
+
+fastify.get('/api/actions/stop', async (request, reply) => {
+	let allSpeakersStatus = await getAllSpeakersStatus()
+	let speakerName = getWhaMasterOrMainSpeakerName(allSpeakersStatus)
+	let speaker = me.speakers[speakerName]
+	return await speaker.stop()
+})
+
 
 fastify.get("/", (req, reply) => {
 	reply.view("/index.marko");

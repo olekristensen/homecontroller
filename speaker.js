@@ -11,29 +11,22 @@ class Speaker {
 			// Reports the full state of the AVTransport service the first time it fires,
 			// then reports diffs. Can be used to maintain a reliable copy of the
 			// service internal state.
-			console.log(status);
+			console.log("status", status);
 		});
 		this.client.on('playing', function () {
 			console.log('playing');
-
-			this.client.getPosition(function (err, position) {
-				console.log(position); // Current position in seconds
-			});
-
-			this.client.getDuration(function (err, duration) {
-				console.log(duration); // Media duration in seconds
-			});
 		});
 	}
 
 	async getStatus() {
+		//TODO: update to use status reported from status callback
 		this.status.transport = await this.getTransportInfo()
 		this.status.media = await this.getMediaInfo()
-    this.status.volume = await this.getVolume()
-    this.status.wha = await this.getWholeHomeAudioStatus()
+		this.status.volume = await this.getVolume()
+		this.status.wha = await this.getWholeHomeAudioStatus()
 		return {
 			name: this.name,
-      status: this.status
+			status: this.status
 		}
 	}
 
@@ -76,7 +69,7 @@ class Speaker {
 			parseString(xml, callback)
 		})
 		const CurrentURIMetaData = await asyncParse(mediaInfo.CurrentURIMetaData)
-		if(CurrentURIMetaData) mediaInfo.CurrentURIMetaData = CurrentURIMetaData["DIDL-Lite"].item;
+		if (CurrentURIMetaData) mediaInfo.CurrentURIMetaData = CurrentURIMetaData["DIDL-Lite"].item;
 		return mediaInfo;
 	}
 
@@ -104,47 +97,49 @@ class Speaker {
 	}
 
 	async getWholeHomeAudioStatus() {
-    const asyncFunc = util.promisify(callback => {
-      this.client.callAction('urn:schemas-smsc-com:serviceId:X_WholeHomeAudio:1', 'GetDeviceStatusInfo', {}, function (err, result) {
-        if (err) return callback(err);
-        callback(null, result);
-      });
+		const asyncFunc = util.promisify(callback => {
+			this.client.callAction('urn:schemas-smsc-com:serviceId:X_WholeHomeAudio:1', 'GetDeviceStatusInfo', {}, function (err, result) {
+				if (err) return callback(err);
+				callback(null, result);
+			});
 		})
 		const result = await asyncFunc();
-    return result
+		return result
 	}
 
 	async wholeHomeAudioCreateParty() {
-    const asyncFunc = util.promisify(callback => {
-      this.client.callAction('urn:schemas-smsc-com:serviceId:X_WholeHomeAudio:1', 'CreateParty', {}, function (err, result) {
-        if (err) return callback(err);
-        callback(null, result);
-      });
+		const asyncFunc = util.promisify(callback => {
+			this.client.callAction('urn:schemas-smsc-com:serviceId:X_WholeHomeAudio:1', 'CreateParty', {}, function (err, result) {
+				if (err) return callback(err);
+				callback(null, result);
+			});
 		})
 		const result = await asyncFunc();
-    return result
+		return result
 	}
 
 	async wholeHomeAudioLeaveParty() {
-    const asyncFunc = util.promisify(callback => {
-      this.client.callAction('urn:schemas-smsc-com:serviceId:X_WholeHomeAudio:1', 'LeaveParty', {}, function (err, result) {
-        if (err) return callback(err);
-        callback(null, result);
-      });
+		const asyncFunc = util.promisify(callback => {
+			this.client.callAction('urn:schemas-smsc-com:serviceId:X_WholeHomeAudio:1', 'LeaveParty', {}, function (err, result) {
+				if (err) return callback(err);
+				callback(null, result);
+			});
 		})
 		const result = await asyncFunc();
-    return result
+		return result
 	}
 
 	async wholeHomeAudioJoinParty(party) {
-    const asyncFunc = util.promisify((partyID, callback) => {
-      this.client.callAction('urn:schemas-smsc-com:serviceId:X_WholeHomeAudio:1', 'JoinParty', {"PartyId": partyID}, function (err, result) {
-        if (err) return callback(err);
-        callback(null, result);
-      });
+		const asyncFunc = util.promisify((partyID, callback) => {
+			this.client.callAction('urn:schemas-smsc-com:serviceId:X_WholeHomeAudio:1', 'JoinParty', {
+				"PartyId": partyID
+			}, function (err, result) {
+				if (err) return callback(err);
+				callback(null, result);
+			});
 		})
 		const result = await asyncFunc(party);
-    return result
+		return result
 	}
 }
 
