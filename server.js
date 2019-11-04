@@ -5,7 +5,8 @@ const util = require('util')
 const Speaker = require('./speaker')
 
 const fastify = require('fastify')({
-	logger: true
+	logger: true,
+	http2: false
 })
 
 fastify.register(require("point-of-view"), {
