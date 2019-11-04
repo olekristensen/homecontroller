@@ -394,6 +394,7 @@ function mod(n, m) {
 
 const start = async () => {
 	try {
+		fastify.log.info("Starting server")
 		await fastify.listen(3000, '0.0.0.0')
 	} catch (err) {
 		fastify.log.error(err)
