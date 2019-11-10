@@ -23,6 +23,7 @@ class Speaker {
 		this.status.transport = await this.getTransportInfo()
 		this.status.media = await this.getMediaInfo()
 		this.status.volume = await this.getVolume()
+		//FIXME: only ask for wha when listed as service
 		this.status.wha = await this.getWholeHomeAudioStatus()
 		return {
 			name: this.name,
@@ -57,6 +58,22 @@ class Speaker {
 		})
 		if (await asyncSetVolume(vol)) {
 			return await this.getVolume();
+		}
+	}
+
+	async getMute() {
+		const asyncGetMute = util.promisify(callback => {
+			this.client.getMute(callback)
+		})
+		return await asyncGetMute();
+	}
+
+	async setMute(mute) {
+		const asyncSetMute = util.promisify((mute, callback) => {
+			this.client.setMute(mute, callback)
+		})
+		if (await asyncSetMute(mute)) {
+			return await this.getMute();
 		}
 	}
 

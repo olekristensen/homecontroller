@@ -83,12 +83,12 @@ ssdpClient.on('response', async function (headers, statusCode, rinfo) {
 		me.speakers[speakerName] = new Speaker(headers.LOCATION, speakerName)
 		console.log("Speaker added", speakerName)
 	}
-	/*
+	
     console.log(result.root.device[0].friendlyName[0], util.inspect(result.root.device, {
 		showHidden: false,
-		depth: 3
+		depth: 4
 	}))
-    */
+    
 })
 
 // Get a list of all services on the network
@@ -242,7 +242,8 @@ fastify.get('/api/actions/play', async (request, reply) => {
 
 	await Promise.all(activeSpeakerNames.map(async n => {
 		if (n != mainSpeakerName) {
-			await me.speakers[n].wholeHomeAudioJoinParty(party.PartyId)
+			await me.speakers[n].wholeHomeAudioJoinParty(party.PartyId);
+			await me.speakers[n].setMute(0);
 		}
 	}))
 
