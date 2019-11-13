@@ -56,8 +56,9 @@ class Speaker {
 		const asyncSetVolume = util.promisify((vol, callback) => {
 			this.client.setVolume(vol, callback)
 		})
+		//FIXME: why is volume crashing when in WHA?
 		if (await asyncSetVolume(vol)) {
-			return await this.getVolume();
+			return vol
 		}
 	}
 

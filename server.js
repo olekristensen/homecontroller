@@ -15,6 +15,7 @@ fastify.register(require("point-of-view"), {
 	}
 })
 
+//TODO: Add channel logos and titles
 this.settings = {
 	streams: {
 		'DR P1': {
@@ -49,10 +50,16 @@ this.settings = {
 			}, {
 				from: 00,
 				to: 09
-			}]
+			}],
+			defaultVolume: 6
 		},
 		"Stue": {
-			main: true
+			main: true,
+			defaultVolume: 10
+		},
+		"Køkken": {
+			main:false,
+			defaultVolume: 6
 		}
 	}
 }
@@ -83,10 +90,9 @@ ssdpClient.on('response', async function (headers, statusCode, rinfo) {
 		me.speakers[speakerName] = new Speaker(headers.LOCATION, speakerName)
 		console.log("Speaker added", speakerName)
 	}
-	
-    console.log(result.root.device[0].friendlyName[0], util.inspect(result.root.device, {
+    console.log(description.root.device[0].friendlyName[0] + " device description", util.inspect(description.root.device, {
 		showHidden: false,
-		depth: 4
+		depth: 10
 	}))
     
 })
@@ -212,13 +218,31 @@ fastify.get('/api/actions/previous', async (request, reply) => {
 })
 
 fastify.get('/api/actions/up', async (request, reply) => {
-	// TODO:
-	// return await me.speakers[name].wholeHomeAudioLeaveParty()
+
+	let activeSpeakerNames = getActiveSpeakerNames();
+	let ret = {};
+
+	await Promise.all(activeSpeakerNames.map( async s => {
+		let volume = await me.speakers[s].getVolume();
+		volume += 1;
+		ret[s] = await me.speakers[s].setVolume(volume);
+	}));
+
+	return ret;
+	
 })
 
 fastify.get('/api/actions/down', async (request, reply) => {
-	// TODO:
-	// return await me.speakers[name].wholeHomeAudioLeaveParty()
+	let activeSpeakerNames = getActiveSpeakerNames();
+	let ret = {};
+
+	await Promise.all(activeSpeakerNames.map( async s => {
+		let volume = await me.speakers[s].getVolume();
+		volume = Math.max(volume-1, 0);
+		ret[s] = await me.speakers[s].setVolume(volume);
+	}));
+
+	return ret;
 })
 
 fastify.get('/api/actions/play', async (request, reply) => {
@@ -234,16 +258,16 @@ fastify.get('/api/actions/play', async (request, reply) => {
 		await me.speakers[s].wholeHomeAudioLeaveParty()
 	}))
 
-	//TODO: make function to extract wha master with priority given to main speaker
-	//TODO: make function to extract a currently playing defined stream playing from wha master or main speaker 
 	//TODO: check if the party is already started, see if there's something else playing, and just load the new channel, and join missing speakers
+	//      use getWhaMasterOrMainSpeakerName
 
 	let party = await me.speakers[mainSpeakerName].wholeHomeAudioCreateParty()
 
 	await Promise.all(activeSpeakerNames.map(async n => {
+		await me.speakers[n].setVolume(me.settings.speakers[n].defaultVolume);
+		await me.speakers[n].setMute(0);
 		if (n != mainSpeakerName) {
 			await me.speakers[n].wholeHomeAudioJoinParty(party.PartyId);
-			await me.speakers[n].setMute(0);
 		}
 	}))
 
