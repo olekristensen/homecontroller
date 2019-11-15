@@ -48,8 +48,8 @@ this.settings = {
 				from: 19,
 				to: 24
 			}, {
-				from: 00,
-				to: 09
+				from: 0,
+				to: 9
 			}],
 			defaultVolume: 6
 		},
@@ -89,11 +89,11 @@ ssdpClient.on('response', async function (headers, statusCode, rinfo) {
 	if (!me.speakers[speakerName]) {
 		me.speakers[speakerName] = new Speaker(headers.LOCATION, speakerName)
 		console.log("Speaker added", speakerName)
+		console.log(description.root.device[0].friendlyName[0] + " device description", util.inspect(description.root.device, {
+			showHidden: false,
+			depth: 10
+		}))
 	}
-    console.log(description.root.device[0].friendlyName[0] + " device description", util.inspect(description.root.device, {
-		showHidden: false,
-		depth: 10
-	}))
     
 })
 
@@ -395,6 +395,7 @@ function getActiveSpeakerNames() {
 		if (setting && setting.silentHours) {
 			setting.silentHours.map(h => {
 				if (h.from && h.to) {
+					//FIXME: DID NOT FIND MORNING HOURS
 					console.log(h);
 					if (hours >= h.from && hours < h.to) {
 						speakerActive = false;
