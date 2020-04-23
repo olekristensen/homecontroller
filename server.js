@@ -87,8 +87,10 @@ ssdpClient.on('response', async function (headers, statusCode, rinfo) {
 	const speakerName = description.root.device[0].friendlyName[0]
 
 	if (!me.speakers[speakerName]) {
-		me.speakers[speakerName] = new Speaker(headers.LOCATION, speakerName)
-		console.log("Speaker added", speakerName)
+		if(description.root.device[0].manufacturer.includes('clintdigital.com')){
+			me.speakers[speakerName] = new Speaker(headers.LOCATION, speakerName)
+		}
+		console.log("Speaker added", speakerName, headers.LOCATION)
 		console.log(description.root.device[0].friendlyName[0] + " device description", util.inspect(description.root.device, {
 			showHidden: false,
 			depth: 10
